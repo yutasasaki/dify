@@ -1,7 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 from collections.abc import Generator
-from typing import Union
+from typing import Optional, Union
 
 from core.agent.base_agent_runner import BaseAgentRunner
 from core.agent.entities import AgentScratchpadUnit
@@ -19,7 +19,10 @@ from core.prompt.agent_history_prompt_transform import AgentHistoryPromptTransfo
 from core.tools.entities.tool_entities import ToolInvokeMeta
 from core.tools.tool.tool import Tool
 from core.tools.tool_engine import ToolEngine
-from models.model import Message
+from extensions.ext_database import db
+from models.model import AppModelConfig, Message
+from services.ops_trace.base_trace_instance import BaseTraceInstance
+from services.ops_trace.ops_trace_service import OpsTraceService
 
 
 class CotAgentRunner(BaseAgentRunner, ABC):
@@ -31,7 +34,8 @@ class CotAgentRunner(BaseAgentRunner, ABC):
     _query: str = None
     _prompt_messages_tools: list[PromptMessage] = None
 
-    def run(self, message: Message,
+    def run(
+        self, message: Message,
         query: str,
         inputs: dict[str, str],
     ) -> Union[Generator, LLMResult]:
@@ -41,6 +45,15 @@ class CotAgentRunner(BaseAgentRunner, ABC):
         app_generate_entity = self.application_generate_entity
         self._repack_app_generate_entity(app_generate_entity)
         self._init_react_state(query)
+
+        # get tracing instance
+        app_config = self.app_config
+        app_id = self.app_config.app_id
+        app_model_config_id = app_config.app_model_config_id
+        app_model_config = db.session.query(AppModelConfig).filter_by(id=app_model_config_id).first()
+        tracing_instance = OpsTraceService.get_ops_trace_instance(
+            app_id=app_id, app_model_config=app_model_config
+        )
 
         # check model mode
         if 'Observation' not in app_generate_entity.model_conf.stop:
@@ -209,7 +222,8 @@ class CotAgentRunner(BaseAgentRunner, ABC):
                     tool_invoke_response, tool_invoke_meta = self._handle_invoke_action(
                         action=scratchpad.action, 
                         tool_instances=tool_instances,
-                        message_file_ids=message_file_ids
+                        message_file_ids=message_file_ids,
+                        tracing_instance=tracing_instance,
                     )
                     scratchpad.observation = tool_invoke_response
                     scratchpad.agent_response = tool_invoke_response
@@ -275,7 +289,9 @@ class CotAgentRunner(BaseAgentRunner, ABC):
 
     def _handle_invoke_action(self, action: AgentScratchpadUnit.Action, 
                               tool_instances: dict[str, Tool],
-                              message_file_ids: list[str]) -> tuple[str, ToolInvokeMeta]:
+                              message_file_ids: list[str],
+                              tracing_instance: Optional[BaseTraceInstance] = None
+                              ) -> tuple[str, ToolInvokeMeta]:
         """
         handle invoke action
         :param action: action
@@ -305,7 +321,8 @@ class CotAgentRunner(BaseAgentRunner, ABC):
             tenant_id=self.tenant_id,
             message=self.message,
             invoke_from=self.application_generate_entity.invoke_from,
-            agent_tool_callback=self.agent_callback
+            agent_tool_callback=self.agent_callback,
+            tracing_instance=tracing_instance,
         )
 
         # publish files
