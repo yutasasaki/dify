@@ -117,7 +117,7 @@ class Config:
         # ------------------------
         # General Configurations.
         # ------------------------
-        self.CURRENT_VERSION = "0.6.10"
+        self.CURRENT_VERSION = "0.6.11"
         self.COMMIT_SHA = get_env('COMMIT_SHA')
         self.EDITION = get_env('EDITION')
         self.DEPLOY_ENV = get_env('DEPLOY_ENV')
@@ -253,6 +253,13 @@ class Config:
         self.GOOGLE_STORAGE_BUCKET_NAME = get_env('GOOGLE_STORAGE_BUCKET_NAME')
         self.GOOGLE_STORAGE_SERVICE_ACCOUNT_JSON_BASE64 = get_env('GOOGLE_STORAGE_SERVICE_ACCOUNT_JSON_BASE64')
 
+        # Tencent Cos Storage settings
+        self.TENCENT_COS_BUCKET_NAME = get_env('TENCENT_COS_BUCKET_NAME')
+        self.TENCENT_COS_REGION = get_env('TENCENT_COS_REGION')
+        self.TENCENT_COS_SECRET_ID = get_env('TENCENT_COS_SECRET_ID')
+        self.TENCENT_COS_SECRET_KEY = get_env('TENCENT_COS_SECRET_KEY')
+        self.TENCENT_COS_SCHEME = get_env('TENCENT_COS_SCHEME')
+
         # ------------------------
         # Vector Store Configurations.
         # Currently, only support: qdrant, milvus, zilliz, weaviate, relyt, pgvector
@@ -287,6 +294,16 @@ class Config:
         self.RELYT_USER = get_env('RELYT_USER')
         self.RELYT_PASSWORD = get_env('RELYT_PASSWORD')
         self.RELYT_DATABASE = get_env('RELYT_DATABASE')
+
+
+        # tencent settings
+        self.TENCENT_VECTOR_DB_URL = get_env('TENCENT_VECTOR_DB_URL')
+        self.TENCENT_VECTOR_DB_API_KEY = get_env('TENCENT_VECTOR_DB_API_KEY')
+        self.TENCENT_VECTOR_DB_TIMEOUT = get_env('TENCENT_VECTOR_DB_TIMEOUT')
+        self.TENCENT_VECTOR_DB_USERNAME = get_env('TENCENT_VECTOR_DB_USERNAME')
+        self.TENCENT_VECTOR_DB_DATABASE = get_env('TENCENT_VECTOR_DB_DATABASE')
+        self.TENCENT_VECTOR_DB_SHARD = get_env('TENCENT_VECTOR_DB_SHARD')
+        self.TENCENT_VECTOR_DB_REPLICAS = get_env('TENCENT_VECTOR_DB_REPLICAS')
 
         # pgvecto rs settings
         self.PGVECTO_RS_HOST = get_env('PGVECTO_RS_HOST')
