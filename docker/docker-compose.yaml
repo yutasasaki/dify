@@ -168,10 +168,10 @@ services:
       # The sample rate for Sentry profiles. Default: `1.0`
       SENTRY_PROFILES_SAMPLE_RATE: 1.0
       # Notion import configuration, support public and internal
-      NOTION_INTEGRATION_TYPE: public
+      NOTION_INTEGRATION_TYPE: internal
       NOTION_CLIENT_SECRET: you-client-secret
       NOTION_CLIENT_ID: you-client-id
-      NOTION_INTERNAL_SECRET: you-internal-secret
+      NOTION_INTERNAL_SECRET: secret_u59xmWbW9UJRsABGkQ9q80GvU43CzyLqSoX41wZQ4QX
       # The sandbox service endpoint.
       CODE_EXECUTION_ENDPOINT: "http://sandbox:8194"
       CODE_EXECUTION_API_KEY: dify-sandbox
@@ -199,6 +199,7 @@ services:
     networks:
       - ssrf_proxy_network
       - default
+      - common_network  
 
   # worker service
   # The Celery worker for processing the queue.
@@ -333,6 +334,7 @@ services:
     networks:
       - ssrf_proxy_network
       - default
+      - common_network
 
   # Frontend web application.
   web:
@@ -447,6 +449,7 @@ services:
     networks:
       - ssrf_proxy_network
       - default
+      - common_network
   # Qdrant vector store.
   # uncomment to use qdrant as vector store.
   # (if uncommented, you need to comment out the weaviate service above,
@@ -505,7 +508,9 @@ services:
       - "80:80"
       #- "443:443"
 networks:
-  # create a network between sandbox, api and ssrf_proxy, and can not access outside.
+  default:
+  common_network:  # 追加
+    external: true
   ssrf_proxy_network:
     driver: bridge
     internal: true
